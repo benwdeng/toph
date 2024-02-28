@@ -56,6 +56,7 @@
             margin-left: 250px; /* Adjusted for sidebar */
             padding: 20px;
             padding-top: 120px; /* Adjust as needed */
+            flex: 1; /* Both take equal width */
         }
 
         /* Box displaying the number of entries */
@@ -103,6 +104,14 @@
             cursor: pointer;
         }
 
+        .entry-details {
+            /* Ensure this container is always visible on the right */
+            overflow: auto; /* Add scroll if content is too long */
+            padding: 20px;
+            box-sizing: border-box;
+            border-left: 1px solid #ccc; /* Optional: adds a line between the list and details */
+        }
+
     </style>
 </head>
 <body>
@@ -135,7 +144,7 @@
                 <tr>
                     <td>{{ entry.name }}</td>
                     <td><a href="{{ entry.document.url }}">Download</a></td>
-                    <td><a href="{% url 'edit_entry' entry.pk %}">Edit</a></td>
+                    <td><a href="#" onclick="openEditModal('{{ entry.pk }}'); return false;">Edit</a></td>
                     <td><a href="{% url 'delete_entry' entry.pk %}" onclick="return confirm('Are you sure?');">Delete</a></td>
                     <td><a href="#" onclick="viewEntry('{{ entry.pk }}'); return false;">View</a></td>
                 </tr>
@@ -161,49 +170,137 @@
         </div>
     </div>
 
-    <div class="details-container" id="entryDetails"></div>
+    <!-- Edit Entry Modal -->
+    <div id="editEntryModal" class="modal">
+        <div class="modal-content">
+            <span class="closeEditModal">&times;</span>
+            <h2>Edit Entry</h2>
+            <form id="editEntryForm" method="post" enctype="multipart/form-data">
+                <!-- Form fields will be populated dynamically -->
+            </form>
+        </div>
+    </div>
+
+
+    <div class="entry-details" id="entryDetails"></div>
 
     <script>
+        let lastEntryId = null; // Track the last entry ID that was clicked
+
         function viewEntry(entryId) {
-            fetch(`/entry-details/${entryId}`)
-            .then(response => response.json())
+            const detailsContainer = document.querySelector('.entry-details');
+            
+            // Toggle visibility if the same entry's "View" button is clicked again
+            if (lastEntryId === entryId) {
+                detailsContainer.style.display = detailsContainer.style.display === 'none' ? '' : 'none';
+                lastEntryId = null; // Reset lastEntryId
+                return; // Exit the function
+            }
+
+            // If a different entry's "View" button is clicked, proceed to fetch and display its details
+            lastEntryId = entryId; // Update lastEntryId to the current entry
+            detailsContainer.style.display = ''; // Ensure the container is visible
+
+            // Construct the URL using the entry ID, ensuring to match your Django URL pattern
+            const url = `/toph_lawfirm/entry-details/${entryId}/`;
+
+            // Use the fetch API to make an AJAX call to the server
+            fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json(); // Parse the JSON in the response
+            })
             .then(data => {
-                document.getElementById('entryDetails').innerHTML = `
+                // Use the data from the server to update the page
+                detailsContainer.innerHTML = `
                     <h3>${data.name}</h3>
                     <p>Document: <a href="${data.document_url}" target="_blank">Download</a></p>
-                    <!-- Display more details as needed -->
+                    <!-- Include more details as needed -->
                 `;
+            })
+            .catch(error => {
+                console.error('Error fetching entry details:', error);
             });
         }
+
+
+    </script>
+
+    <script>
+        function openEditModal(entryId) {
+            const url = `/toph_lawfirm/entry/edit/${entryId}/`;
+
+            // Fetch the entry's current data for editing
+            fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                // Assuming the response is HTML form
+                document.getElementById('editEntryForm').innerHTML = html;
+                document.getElementById('editEntryModal').style.display = 'block';
+            })
+            .catch(error => console.error('Error loading the edit form:', error));
+        }
+
+        // Close modal on clicking the close button
+        document.querySelector('.closeEditModal').onclick = function() {
+            document.getElementById('editEntryModal').style.display = 'none';
+        };
+
+        document.getElementById('editEntryForm').onsubmit = function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const formData = new FormData(this);
+            const url = this.action; // URL to submit the form data to
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => {
+                if(response.ok) {
+                    // Handle successful update here, e.g., close modal, refresh entry list
+                    document.getElementById('editEntryModal').style.display = 'none';
+                    // Optionally, refresh the entries list or update the UI as needed
+                } else {
+                    throw new Error('Error updating the entry');
+                }
+            })
+            .catch(error => console.error('Error submitting the edit form:', error));
+        };
+
+
+    </script>
+
+    <script>
+        // Get the modal
+        var modal = document.getElementById('addEntryModal');
+        
+        // Get the button that opens the modal
+        var btn = document.getElementById('addEntryBtn');
+        
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+        
+        // When the user clicks the button, open the modal 
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+        
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+        
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
     </script>
 
 </body>
 </html>
-<script>
-    // Get the modal
-    var modal = document.getElementById('addEntryModal');
-    
-    // Get the button that opens the modal
-    var btn = document.getElementById('addEntryBtn');
-    
-    // Get the <span> element that closes the modal
-    var span = document.getElementsByClassName("close")[0];
-    
-    // When the user clicks the button, open the modal 
-    btn.onclick = function() {
-        modal.style.display = "block";
-    }
-    
-    // When the user clicks on <span> (x), close the modal
-    span.onclick = function() {
-        modal.style.display = "none";
-    }
-    
-    // When the user clicks anywhere outside of the modal, close it
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-
-</script>

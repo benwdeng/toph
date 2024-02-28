@@ -20,10 +20,10 @@ def edit_entry(request, pk):
         form = EntryForm(request.POST, request.FILES, instance=entry)
         if form.is_valid():
             form.save()
-            return redirect('entry_detail', pk=entry.pk)  # Redirect to the entry's detail view or another appropriate view
-    else:
-        form = EntryForm(instance=entry)
-    return render(request, 'toph_lawfirm/edit_entry.html', {'form': form})
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
 
 def entry_detail(request, pk):
     entry = get_object_or_404(Entry, pk=pk)
@@ -35,9 +35,12 @@ def delete_entry(request, pk):
     return redirect('entry_list')  # Redirect to your entries list view
 
 def entry_details(request, pk):
-    entry = Entry.objects.get(pk=pk)
-    return JsonResponse({
-        'name': entry.name,
-        'document_url': entry.document.url,
-        # Add more fields as necessary
-    })
+    try:
+        entry = Entry.objects.get(pk=pk)
+        return JsonResponse({
+            'name': entry.name,
+            # Adjust this to match how your Entry model's document field can be accessed
+            'document_url': entry.document.url if hasattr(entry.document, 'url') else ''
+        })
+    except Entry.DoesNotExist:
+        return JsonResponse({'error': 'Entry not found'}, status=404)
