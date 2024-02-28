@@ -27,3 +27,8 @@ def edit_entry(request, pk):
 def entry_detail(request, pk):
     entry = get_object_or_404(Entry, pk=pk)
     return render(request, 'toph_lawfirm/entry_detail.html', {'entry': entry})
+
+def delete_entry(request, pk):
+    entry = Entry.objects.get(pk=pk)
+    entry.delete()
+    return redirect('entry_list')  # Redirect to your entries list view

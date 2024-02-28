@@ -2,28 +2,116 @@
 <html>
 <head>
     <title>Entries</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        /* Banner style */
+        .banner {
+            background-color: #007bff; /* Blue color */
+            color: white; /* White text color */
+            padding: 10px 20px; /* Some padding */
+            text-align: left; /* Left align text */
+            position: fixed; /* Make the banner fixed at the top */
+            width: 100%; /* Full width */
+            top: 0;
+            left: 0;
+            z-index: 2; /* Ensure banner is above other content */
+        }
+
+        /* Container for sidebar and main content */
+        .container {
+            display: flex;
+            margin-top: 60px; /* Adjust based on the height of your banner */
+        }
+
+        /* The sidebar */
+        .sidebar {
+            height: calc(100vh - 120px); /* Adjust height to take banner into account */
+            width: 250px;
+            position: fixed;
+            top: 120px; /* Adjusted to push down from the top, below the banner */
+            left: 0;
+            background-color: #007bff;
+            overflow-x: hidden;
+            padding-top: 20px;
+            z-index: 1;
+        }
+
+        .sidebar a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+        }
+
+        .sidebar a:hover {
+            background-color: #0056b3;
+        }
+
+        /* Main content */
+        .main-content {
+            margin-left: 250px; /* Adjusted for sidebar */
+            padding: 20px;
+            padding-top: 120px; /* Adjust as needed */
+        }
+
+        /* Box displaying the number of entries */
+        .entry-count {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-    <h2>Add Entry</h2>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Submit</button>
-    </form>
-    <h2>Entries</h2>
-    <table>
-        <tr>
-            <th>Name</th>
-            <th>Document</th>
-            <th>Action</th> <!-- Add a header for the action column -->
-        </tr>
-        {% for entry in entries %}
-        <tr>
-            <td>{{ entry.name }}</td>
-            <td><a href="{{ entry.document.url }}">Download</a></td>
-            <td><a href="{% url 'edit_entry' entry.pk %}">Edit</a></td> <!-- Add an Edit button/link -->
-        </tr>
-        {% endfor %}
-    </table>
+
+<div class="banner">
+    <h1>The Online Planning Hub</h1>
+</div>
+
+<div class="container">
+    <div class="sidebar">
+        <a href="#home">Home</a>
+        <a href="#addEntry">Add Entry</a>
+        <a href="#viewEntries">View Entries</a>
+        <!-- Add more sidebar links as needed -->
+    </div>
+
+    <div class="main-content">
+        <!-- Box displaying the number of entries -->
+        <div class="entry-count">
+            Number of Entries: {{ entries|length }}
+        </div>
+
+        <!-- Your form and table content goes here -->
+        <h2>Add Entry</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Submit</button>
+        </form>
+        <h2>Entries</h2>
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Document</th>
+                <th>Action</th>
+            </tr>
+            {% for entry in entries %}
+            <tr>
+                <td>{{ entry.name }}</td>
+                <td><a href="{{ entry.document.url }}">Download</a></td>
+                <td><a href="{% url 'edit_entry' entry.pk %}">Edit</a></td>
+                <td><a href="{% url 'delete_entry' entry.pk %}" onclick="return confirm('Are you sure?');">Delete</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
 </body>
 </html>
