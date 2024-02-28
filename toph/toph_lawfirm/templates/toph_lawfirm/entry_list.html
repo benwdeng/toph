@@ -107,56 +107,75 @@
 </head>
 <body>
 
-<div class="banner">
-    <h1>The Online Planning Hub</h1>
-</div>
-
-<div class="container">
-    <div class="sidebar">
-        <a href="#home">Home</a>
-        <a href="#addEntry">Add Entry</a>
-        <a href="#viewEntries">View Entries</a>
-        <!-- Add more sidebar links as needed -->
+    <div class="banner">
+        <h1>The Online Planning Hub</h1>
     </div>
 
-    <div class="main-content">
-        <!-- Box displaying the number of entries -->
-        <div class="entry-count">
-            Number of Entries: {{ entries|length }}
+    <div class="container">
+        <div class="sidebar">
+            <a href="#home">Home</a>
+            <a href="#addEntry">Add Entry</a>
+            <a href="#viewEntries">View Entries</a>
+            <!-- Add more sidebar links as needed -->
         </div>
-        <h2>Entries</h2>
-        <table>
-            <tr>
-                <th>Name</th>
-                <th>Document</th>
-                <th>Action</th>
-            </tr>
-            {% for entry in entries %}
-            <tr>
-                <td>{{ entry.name }}</td>
-                <td><a href="{{ entry.document.url }}">Download</a></td>
-                <td><a href="{% url 'edit_entry' entry.pk %}">Edit</a></td>
-                <td><a href="{% url 'delete_entry' entry.pk %}" onclick="return confirm('Are you sure?');">Delete</a></td>
-            </tr>
-            {% endfor %}
-        </table>
-        <!-- Trigger/Open The Modal -->
-        <button id="addEntryBtn">Add Entry</button>
+
+        <div class="main-content">
+            <!-- Box displaying the number of entries -->
+            <div class="entry-count">
+                Number of Entries: {{ entries|length }}
+            </div>
+            <h2>Entries</h2>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Document</th>
+                    <th>Action</th>
+                </tr>
+                {% for entry in entries %}
+                <tr>
+                    <td>{{ entry.name }}</td>
+                    <td><a href="{{ entry.document.url }}">Download</a></td>
+                    <td><a href="{% url 'edit_entry' entry.pk %}">Edit</a></td>
+                    <td><a href="{% url 'delete_entry' entry.pk %}" onclick="return confirm('Are you sure?');">Delete</a></td>
+                    <td><a href="#" onclick="viewEntry('{{ entry.pk }}'); return false;">View</a></td>
+                </tr>
+                {% endfor %}
+            </table>
+            <!-- Trigger/Open The Modal -->
+            <button id="addEntryBtn">Add Entry</button>
+            <div class="entry-details" style="float: right; width: 50%; height: 100vh; overflow: auto; padding: 20px; box-sizing: border-box;"></div>
+
+        </div>
     </div>
-</div>
-<!-- Add Entry Modal -->
-<div id="addEntryModal" class="modal">
-    <!-- Modal content -->
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Add Entry</h2>
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Submit</button>
-        </form>
+    <!-- Add Entry Modal -->
+    <div id="addEntryModal" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add Entry</h2>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Submit</button>
+            </form>
+        </div>
     </div>
-</div>
+
+    <div class="details-container" id="entryDetails"></div>
+
+    <script>
+        function viewEntry(entryId) {
+            fetch(`/entry-details/${entryId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('entryDetails').innerHTML = `
+                    <h3>${data.name}</h3>
+                    <p>Document: <a href="${data.document_url}" target="_blank">Download</a></p>
+                    <!-- Display more details as needed -->
+                `;
+            });
+        }
+    </script>
 
 </body>
 </html>
@@ -186,5 +205,5 @@
             modal.style.display = "none";
         }
     }
-    </script>
-    
+
+</script>

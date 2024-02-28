@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Entry
 from .forms import EntryForm
+from django.http import JsonResponse
 
 def entry_list(request):
     if request.method == 'POST':
@@ -32,3 +33,11 @@ def delete_entry(request, pk):
     entry = Entry.objects.get(pk=pk)
     entry.delete()
     return redirect('entry_list')  # Redirect to your entries list view
+
+def entry_details(request, pk):
+    entry = Entry.objects.get(pk=pk)
+    return JsonResponse({
+        'name': entry.name,
+        'document_url': entry.document.url,
+        # Add more fields as necessary
+    })
