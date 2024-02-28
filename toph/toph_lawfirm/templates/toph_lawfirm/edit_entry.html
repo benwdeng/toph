@@ -4,10 +4,11 @@
     <title>Edit Entry</title>
 </head>
 <body>
-    <h2>Edit Entry</h2>
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" id="editEntryForm">
         {% csrf_token %}
         {{ form.as_p }}
+        <!-- Include the entry's ID as a hidden field -->
+        <input type="hidden" name="entry_id" value="{{ entry.id }}">
         <button type="submit">Save changes</button>
     </form>
 </body>

@@ -144,7 +144,7 @@
                 <tr>
                     <td>{{ entry.name }}</td>
                     <td><a href="{{ entry.document.url }}">Download</a></td>
-                    <td><a href="#" onclick="openEditModal('{{ entry.pk }}'); return false;">Edit</a></td>
+                    <td><a href="#" onclick="fetchEditForm('{{ entry.pk }}'); return false;">Edit</a></td>
                     <td><a href="{% url 'delete_entry' entry.pk %}" onclick="return confirm('Are you sure?');">Delete</a></td>
                     <td><a href="#" onclick="viewEntry('{{ entry.pk }}'); return false;">View</a></td>
                 </tr>
@@ -257,6 +257,9 @@
             fetch(url, {
                 method: 'POST',
                 body: formData,
+                headers: {
+                    'X-CSRFToken': getCSRFToken(), // Function to get CSRF token
+                },
             })
             .then(response => {
                 if(response.ok) {
@@ -301,6 +304,68 @@
         }
 
     </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Function to fetch and display the edit form
+            function fetchEditForm(entryId) {
+                const url = `/toph_lawfirm/entry/edit/${entryId}/`;
+                fetch(url)
+                    .then(response => response.text())
+                    .then(html => {
+                        document.querySelector('#editEntryForm').innerHTML = html;
+                        document.querySelector('#editEntryModal').style.display = 'block';
+                        attachFormSubmitHandler(entryId);
+                    })
+                    .catch(error => console.error('Error loading edit form:', error));
+            }
+
+            // Attach this function to your edit button's onclick event
+            window.fetchEditForm = fetchEditForm;
+
+            // Function to handle form submission
+            function attachFormSubmitHandler(entryId) {
+                const form = document.querySelector('#editEntryForm');
+                form.onsubmit = function(event) {
+                    event.preventDefault();
+                    const formData = new FormData(form);
+                    const url = `/toph_lawfirm/entry/edit/${entryId}/`;
+                    const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+                    fetch(url, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                        },
+                    })
+                    .then(response => {
+                        if(response.ok) {
+                            document.querySelector('#editEntryModal').style.display = 'none';
+                            location.reload(); // Reload the page to reflect the changes
+                        } else {
+                            console.error('Failed to update the entry');
+                        }
+                    })
+                    .catch(error => console.error('Error submitting the edit form:', error));
+                };
+            }
+        });
+
+        // Function to close the edit modal
+        function closeEditModal() {
+            document.querySelector('#editEntryModal').style.display = 'none';
+        }
+        // Close modal when the user clicks on <span> (x) button
+        document.querySelector('.closeEditModal').addEventListener('click', closeEditModal);
+        // Optional: Close the modal if the user clicks outside of it
+        window.addEventListener('click', function(event) {
+            const modal = document.querySelector('#editEntryModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        });
+    </script>
+    
 
 </body>
 </html>

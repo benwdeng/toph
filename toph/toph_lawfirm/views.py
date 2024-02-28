@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Entry
 from .forms import EntryForm
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 
 def entry_list(request):
     if request.method == 'POST':
@@ -23,7 +23,9 @@ def edit_entry(request, pk):
             return JsonResponse({'success': True})
         else:
             return JsonResponse({'success': False, 'errors': form.errors}, status=400)
-
+    else:
+        form = EntryForm(instance=entry)
+        return render(request, 'toph_lawfirm/edit_entry.html', {'form': form, 'entry': entry})
 
 def entry_detail(request, pk):
     entry = get_object_or_404(Entry, pk=pk)
