@@ -1,18 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Entries</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+
+    <title>The Online Planning Hub - Law Firm Portal</title>
     <style>
         body {
             margin: 0;
             font-family: Arial, sans-serif;
+            font-size: 11px; /* Slightly smaller font */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse; /* Collapse borders */
+        }
+        th, td {
+            text-align: left;
+            padding: 8px; /* Add more padding */
+            border-bottom: 1px solid #ddd; /* Add bottom border */
+        }
+        th {
+            background-color: #1f446c; /* Header background color */
+            color: white; /* Header font color */
+        }
+        tr:nth-child(even) {
+            background-color: #808080; /* Zebra striping for rows */
+        }
+        tr:hover {
+            background-color: #6d6c6c; /* Hover effect for rows */
+        }
+        a {
+            color: #114174; /* Links color */
+            text-decoration: none; /* Remove underline */
+        }
+        a:hover {
+            text-decoration: underline; /* Underline on hover */
         }
         /* Banner style */
         .banner {
-            background-color: #007bff; /* Blue color */
+            display: flex; /* Use flexbox layout */
+            justify-content: space-between; /* Space between items */
+            align-items: center; /* Align items vertically */
+            background-color: #1e4d7e; /* Blue color */
             color: white; /* White text color */
             padding: 10px 20px; /* Some padding */
-            text-align: left; /* Left align text */
             position: fixed; /* Make the banner fixed at the top */
             width: 100%; /* Full width */
             top: 0;
@@ -20,20 +51,36 @@
             z-index: 2; /* Ensure banner is above other content */
         }
 
+        .logout-button {
+            background: none; 
+            border: none; 
+            cursor: pointer; 
+            color: white; 
+            font-size: 16px;
+        }
+
+        .logout-container {
+            margin-right: 40px; /* Adjust this value as needed */
+        }
+
+
+
+
         /* Container for sidebar and main content */
         .container {
             display: flex;
             margin-top: 60px; /* Adjust based on the height of your banner */
+            width: 100%;
         }
 
         /* The sidebar */
         .sidebar {
-            height: calc(100vh - 120px); /* Adjust height to take banner into account */
-            width: 250px;
+            height: calc(100vh - 60px); /* Adjust height to take banner into account */
+            width: 15%;
             position: fixed;
-            top: 120px; /* Adjusted to push down from the top, below the banner */
+            top: 60px; /* Adjusted to push down from the top, below the banner */
             left: 0;
-            background-color: #007bff;
+            background-color: #5e5d5d;
             overflow-x: hidden;
             padding-top: 20px;
             z-index: 1;
@@ -42,30 +89,43 @@
         .sidebar a {
             padding: 10px 15px;
             text-decoration: none;
-            font-size: 18px;
+            font-size: 14px;
             color: white;
             display: block;
         }
 
         .sidebar a:hover {
-            background-color: #0056b3;
+            background-color: #4f4f4f;
         }
 
         /* Main content */
         .main-content {
-            margin-left: 250px; /* Adjusted for sidebar */
+            margin-left: 15%; /* Adjusted for sidebar */
             padding: 20px;
-            padding-top: 120px; /* Adjust as needed */
-            flex: 1; /* Both take equal width */
+            padding-top: 20px; /* Adjust as needed */
+            flex: 1; /* Allows the main content to grow */
+            max-width: 50%; /* Limit width to half of the screen */
         }
 
+
         /* Box displaying the number of entries */
+        .entry-counts-container {
+            display: flex; /* Enables Flexbox for child elements */
+            justify-content: space-around; /* Evenly spaces the child elements */
+            flex-wrap: wrap; /* Allows items to wrap as needed */
+            margin-bottom: 20px; /* Adds some space below the container */
+        }
+
         .entry-count {
+            flex: 1; /* Flex grow to fill available space */
+            min-width: 120px; /* Minimum width before wrapping */
             background-color: #f0f0f0;
             padding: 10px;
-            margin-bottom: 20px;
+            margin: 5px; /* Adds some space around each box */
             border-radius: 5px;
+            text-align: center; /* Center the text inside the boxes */
         }
+
         /* The Modal (background) */
         .modal {
             display: none; /* Hidden by default */
@@ -105,56 +165,150 @@
         }
 
         .entry-details {
-            /* Ensure this container is always visible on the right */
-            overflow: auto; /* Add scroll if content is too long */
+            position: fixed;
+            right: 0;
+            top: 80px; /* Adjust based on the banner height */
+            width: 30%;
+            height: calc(100vh - 80px); /* Adjust based on the banner height */
+            overflow: auto;
             padding: 20px;
             box-sizing: border-box;
-            border-left: 1px solid #ccc; /* Optional: adds a line between the list and details */
+            border-left: 1px solid #ccc;
+            visibility: hidden; /* Initially hidden */
         }
 
+        .scrollable-table-container {
+            overflow-x: auto; /* Enable horizontal scrolling */
+            margin: 20px 0; /* Optional: Adds some space around the container */
+        }
+        
+        #draftAgreementForm {
+            background-color: #f0f0f0;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }       
+
+        .sidebar a.active {
+            background-color: #4f4f4f; /* Darker shade for active link */
+            color: #ffffff; /* White color for text */
+        }
+
+        table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
+            background-color: #f2f2f2; /* Your color for odd rows */
+        }
+        table.dataTable.stripe tbody tr.even, table.dataTable.display tbody tr.even {
+            background-color: #808080; /* Your color for even rows */
+        }
+
+        #entriesTable tr.odd { background-color: #f2f2f2 !important; }
+        #entriesTable tr.even { background-color: #dddddd !important; }
+
+
     </style>
+
 </head>
 <body>
 
     <div class="banner">
-        <h1>The Online Planning Hub</h1>
+        <div>
+            <h1>The Online Planning Hub - Law Firm Portal</h1>
+        </div>
+        <!-- Logout Button -->
+        {% if request.user.is_authenticated %}
+        <div class="logout-container">
+            <form action="{% url 'toph_lawfirm_logout' %}" method="post" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="logout-button">Logout</button>
+            </form>
+        </div>
+        {% endif %}
     </div>
+    
+    
+    
 
     <div class="container">
         <div class="sidebar">
-            <a href="#home">Home</a>
-            <a href="#addEntry">Add Entry</a>
-            <a href="#viewEntries">View Entries</a>
+            <a href="#" id="overviewLink" class="active">Overview</a> <!-- Mark Overview as active initially -->
+            <a href="#" id="draftLink">Draft forms</a>
             <!-- Add more sidebar links as needed -->
         </div>
-
+        
+        
         <div class="main-content">
+            <div id="overviewContent">
+
+            <h2 style="font-size: 24px; text-align: center;">Overview</h2>
             <!-- Box displaying the number of entries -->
-            <div class="entry-count">
-                Number of Entries: {{ entries|length }}
+            <div class="entry-counts-container">
+                <div class="entry-count">
+                    Total matters: {{ entries|length }}
+                </div>
+                <div class="entry-count">
+                    Active matters: {{ entries|length }}
+                </div>
+                <div class="entry-count">
+                    Pending matters: {{ entries|length }}
+                </div>
+                <div class="entry-count">
+                    Closed matters: {{ entries|length }}
+                </div>
             </div>
-            <h2>Entries</h2>
-            <table>
-                <tr>
-                    <th>Name</th>
-                    <th>Document</th>
-                    <th>Action</th>
-                </tr>
-                {% for entry in entries %}
-                <tr>
-                    <td>{{ entry.name }}</td>
-                    <td><a href="{{ entry.document.url }}">Download</a></td>
-                    <td><a href="#" onclick="fetchEditForm('{{ entry.pk }}'); return false;">Edit</a></td>
-                    <td><a href="{% url 'delete_entry' entry.pk %}" onclick="return confirm('Are you sure?');">Delete</a></td>
-                    <td><a href="#" onclick="viewEntry('{{ entry.pk }}'); return false;">View</a></td>
-                </tr>
-                {% endfor %}
-            </table>
+            
+            <h2>Matters</h2>
+            <div class="scrollable-table-container">
+                <table id="entriesTable">
+                    <thead>
+                        <tr>
+                            <th>Matter ID</th>
+                            <th>Council</th>
+                            <th>Address</th>
+                            <th>Contact</th>
+                            <th>Document</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in entries %}
+                        <tr>
+                            <td>{{ entry.form_id }}</td>
+                            <td>{{ entry.council }}</td>
+                            <td>{{ entry.subject_land_address }}</td>
+                            <td>{{ entry.contact }}</td>
+                            <td><a href="{{ entry.document.url }}">Download</a></td>
+                            <td>
+                                <a href="#" onclick="fetchEditForm('{{ entry.pk }}'); return false;">Edit</a>
+                                <a href="{% url 'delete_entry' entry.pk %}" onclick="return confirm('Are you sure?');">Delete</a>
+                                <a href="#" onclick="viewEntry('{{ entry.pk }}'); return false;">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
             <!-- Trigger/Open The Modal -->
             <button id="addEntryBtn">Add Entry</button>
-            <div class="entry-details" style="float: right; width: 50%; height: 100vh; overflow: auto; padding: 20px; box-sizing: border-box;"></div>
-
+            </div>
+            <div id="draftAgreementForm" style="display: none;">
+                <h2>Draft Agreement Questions</h2>
+                <form>
+                    <label for="question1">Question 1:</label>
+                    <input type="text" id="question1" name="question1"><br><br>
+            
+                    <label for="question2">Question 2:</label>
+                    <input type="text" id="question2" name="question2"><br><br>
+            
+                    <!-- Add more questions as needed -->
+            
+                    <input type="submit" value="Submit">
+                </form>
+            </div>
+            
         </div>
+
+        <div class="entry-details" ></div>
     </div>
     <!-- Add Entry Modal -->
     <div id="addEntryModal" class="modal">
@@ -190,16 +344,24 @@
         function viewEntry(entryId) {
             const detailsContainer = document.querySelector('.entry-details');
             
-            // Toggle visibility if the same entry's "View" button is clicked again
-            if (lastEntryId === entryId) {
-                detailsContainer.style.display = detailsContainer.style.display === 'none' ? '' : 'none';
+             // Check if the same entry's "View" button is clicked again
+             if (lastEntryId === entryId) {
+                // Toggle visibility
+                if (detailsContainer.style.visibility === 'hidden' || detailsContainer.style.visibility === '') {
+                    detailsContainer.style.visibility = 'visible';
+                    detailsContainer.style.display = ''; // Make sure it's also displayed
+                } else {
+                    detailsContainer.style.visibility = 'hidden';
+                    detailsContainer.style.display = 'none'; // Optionally hide it as well
+                }
                 lastEntryId = null; // Reset lastEntryId
                 return; // Exit the function
             }
 
-            // If a different entry's "View" button is clicked, proceed to fetch and display its details
+            // For a different entry's "View" button click, show the container and fetch details
             lastEntryId = entryId; // Update lastEntryId to the current entry
-            detailsContainer.style.display = ''; // Ensure the container is visible
+            detailsContainer.style.visibility = 'visible'; // Ensure the container is visible
+            detailsContainer.style.display = ''; // Ensure it's also displayed
 
             // Construct the URL using the entry ID, ensuring to match your Django URL pattern
             const url = `/toph_lawfirm/entry-details/${entryId}/`;
@@ -213,17 +375,27 @@
                 return response.json(); // Parse the JSON in the response
             })
             .then(data => {
-                // Use the data from the server to update the page
                 detailsContainer.innerHTML = `
-                    <h3>${data.name}</h3>
+                    <h3>Details for: ${data.form_id}</h3>
+                    <p>Council: ${data.council}</p>
+                    <p>Subject Land Address: ${data.subject_land_address}</p>
+                    <p>Contact: ${data.contact}</p>
+                    <p>Contact Role: ${data.contact_role}</p>
+                    <p>Contact Postal Address: ${data.contact_postal_address}</p>
+                    <p>Contact Number: ${data.contact_number}</p>
+                    <p>Contact Email: ${data.contact_email}</p>
+                    <p>Created Date: ${data.created_date}</p>
+                    <p>Last Updated: ${data.last_updated}</p>
                     <p>Document: <a href="${data.document_url}" target="_blank">Download</a></p>
-                    <!-- Include more details as needed -->
                 `;
             })
+
             .catch(error => {
                 console.error('Error fetching entry details:', error);
             });
         }
+
+
 
 
     </script>
@@ -366,6 +538,60 @@
         });
     </script>
     
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
 
+    <script>
+        $(document).ready(function () {
+            $('#entriesTable').DataTable({
+                "stripeClasses": ['odd', 'even'],
+            });
+        });
+
+    </script>
+
+<script>
+    // Function to show the draft agreement form and hide the overview content
+    function showDraftForm() {
+        var overviewContent = document.getElementById("overviewContent");
+        var draftForm = document.getElementById("draftAgreementForm");
+        overviewContent.style.display = "none";  // Hide the overview content
+        draftForm.style.display = "block";  // Show the draft form
+        // Update active state
+        updateActiveState("draftLink");
+    }
+
+    // Function to show the overview content and hide the draft agreement form
+    function showOverview() {
+        var overviewContent = document.getElementById("overviewContent");
+        var draftForm = document.getElementById("draftAgreementForm");
+        overviewContent.style.display = "block";  // Show the overview content
+        draftForm.style.display = "none";  // Hide the draft form
+        // Update active state
+        updateActiveState("overviewLink");
+    }
+
+    // Function to update the active state of sidebar links
+    function updateActiveState(activeLinkId) {
+        var sidebarLinks = document.querySelectorAll(".sidebar a");
+        sidebarLinks.forEach(link => {
+            if(link.id === activeLinkId) {
+                link.classList.add("active");
+            } else {
+                link.classList.remove("active");
+            }
+        });
+    }
+
+    // Attach event listeners to sidebar links
+    document.getElementById("draftLink").addEventListener("click", showDraftForm);
+    document.getElementById("overviewLink").addEventListener("click", showOverview);
+
+    // Call showOverview initially to set the initial state
+    showOverview();
+</script>
+
+
+        
 </body>
 </html>
