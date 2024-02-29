@@ -74,6 +74,7 @@ def entry_details(request, pk):
             'created_date': entry.created_date,
             'last_updated': entry.last_updated,
             'document_url': entry.document.url if entry.document else None,
+            'status': entry.status,
         })
     except ObjectDoesNotExist:
         return JsonResponse({'error': 'Entry not found'}, status=404)
@@ -116,6 +117,4 @@ from django.urls import reverse_lazy
 
 class custom_logout(LogoutView):
     next_page = reverse_lazy('landing_page')  
-
-
 

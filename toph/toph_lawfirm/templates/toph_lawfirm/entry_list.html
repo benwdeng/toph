@@ -2,6 +2,7 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
     <title>The Online Planning Hub - Law Firm Portal</title>
     <style>
@@ -9,6 +10,7 @@
             margin: 0;
             font-family: Arial, sans-serif;
             font-size: 11px; /* Slightly smaller font */
+            background-color: #fafafa; 
         }
         table {
             width: 100%;
@@ -41,9 +43,9 @@
             display: flex; /* Use flexbox layout */
             justify-content: space-between; /* Space between items */
             align-items: center; /* Align items vertically */
-            background-color: #1e4d7e; /* Blue color */
+            background-color: #1c7996; /* Blue color */
             color: white; /* White text color */
-            padding: 10px 20px; /* Some padding */
+            padding: 0px 20px; /* Some padding */
             position: fixed; /* Make the banner fixed at the top */
             width: 100%; /* Full width */
             top: 0;
@@ -69,18 +71,18 @@
         /* Container for sidebar and main content */
         .container {
             display: flex;
-            margin-top: 60px; /* Adjust based on the height of your banner */
+            margin-top: 20px; /* Adjust based on the height of your banner */
             width: 100%;
         }
 
         /* The sidebar */
         .sidebar {
-            height: calc(100vh - 60px); /* Adjust height to take banner into account */
+            height: calc(100vh - 20px); /* Adjust height to take banner into account */
             width: 15%;
             position: fixed;
-            top: 60px; /* Adjusted to push down from the top, below the banner */
+            top: 20px; /* Adjusted to push down from the top, below the banner */
             left: 0;
-            background-color: #5e5d5d;
+            background-color: #263847;
             overflow-x: hidden;
             padding-top: 20px;
             z-index: 1;
@@ -95,7 +97,7 @@
         }
 
         .sidebar a:hover {
-            background-color: #4f4f4f;
+            background-color: #1e262f;
         }
 
         /* Main content */
@@ -190,7 +192,7 @@
         }       
 
         .sidebar a.active {
-            background-color: #4f4f4f; /* Darker shade for active link */
+            background-color: #1e262f; /* Darker shade for active link */
             color: #ffffff; /* White color for text */
         }
 
@@ -204,6 +206,65 @@
         #entriesTable tr.odd { background-color: #f2f2f2 !important; }
         #entriesTable tr.even { background-color: #dddddd !important; }
 
+        /* DataTables Custom Styling */
+        .dataTables_wrapper {
+            margin-top: 0px; /* Add space above the DataTable */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Add shadow for some depth */
+            border-radius: 5px; /* Round corners */
+            overflow: hidden; /* Ensure rounded corners are not bypassed */
+        }
+
+        .dataTables_length, .dataTables_filter, .dataTables_info, .dataTables_paginate {
+            padding: 10px; /* Padding for DataTable controls */
+            background-color: #fafafa; /* Light background for controls area */
+        }
+
+        table.dataTable thead {
+            background-color: #f9f9f9; /* Slightly different header background for contrast */
+        }
+
+        table.dataTable thead th {
+            border-bottom: 2px solid #ddd; /* Make header bottom border more prominent */
+        }
+
+        table.dataTable.no-footer {
+            border-bottom: 1px solid #eee; /* Lighter border for the bottom of the table */
+        }
+
+        .dataTables_filter input {
+            border-radius: 20px; /* Rounded corners for search input */
+            border: 1px solid #ccc; /* Light border for the search input */
+            padding: 5px 10px; /* Padding inside search input */
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 5px 10px; /* Padding for pagination buttons */
+            margin: 0 2px; /* Spacing between pagination buttons */
+            border-radius: 3px; /* Rounded corners for pagination buttons */
+            border: 1px solid transparent; /* Transparent border for pagination buttons */
+            background-color: #ddd; /* Background for pagination buttons */
+            cursor: pointer; /* Cursor to pointer to indicate clickable */
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background-color: #ccc; /* Darker background on hover for pagination buttons */
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            color: #fff !important; /* White text for active pagination button */
+            border: 1px solid #0275d8; /* Blue border for active pagination button */
+            background-color: #0275d8; /* Blue background for active pagination button */
+        }
+
+
+        .sidebar a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 12px; /* Adjust this value as needed */
+            color: white;
+            display: block;
+        }
+
 
     </style>
 
@@ -212,14 +273,14 @@
 
     <div class="banner">
         <div>
-            <h1>The Online Planning Hub - Law Firm Portal</h1>
+            <h1 style="font-size: 16px;">The Online Planning Hub - Law Firm Portal</h1>
         </div>
         <!-- Logout Button -->
         {% if request.user.is_authenticated %}
         <div class="logout-container">
             <form action="{% url 'toph_lawfirm_logout' %}" method="post" style="margin: 0;">
                 {% csrf_token %}
-                <button type="submit" class="logout-button">Logout</button>
+                <button type="submit" style="font-size: 14px;" class="logout-button">Logout</button>
             </form>
         </div>
         {% endif %}
@@ -230,10 +291,12 @@
 
     <div class="container">
         <div class="sidebar">
-            <a href="#" id="overviewLink" class="active">Overview</a> <!-- Mark Overview as active initially -->
-            <a href="#" id="draftLink">Draft forms</a>
-            <!-- Add more sidebar links as needed -->
+            <a href="#" id="overviewLink" class="active"><i class="fas fa-home"></i> Overview</a> <!-- Icon added next to Overview -->
+            <a href="#" id="draftLink"><i class="fas fa-file-alt"></i> Draft forms</a> <!-- Icon added next to Draft forms -->
+            <a href="#" id="aboutUsLink" ><i class="fas fa-info-circle"></i> About us</a>
+            <!-- Add more sidebar links with icons as needed -->
         </div>
+        
         
         
         <div class="main-content">
@@ -243,16 +306,16 @@
             <!-- Box displaying the number of entries -->
             <div class="entry-counts-container">
                 <div class="entry-count">
-                    Total matters: {{ entries|length }}
+                    <i class="fas fa-folder-open"></i> Total matters: {{ entries|length }}
                 </div>
                 <div class="entry-count">
-                    Active matters: {{ entries|length }}
+                    <i class="fas fa-spinner"></i> Active matters: {{ entries|length }}
                 </div>
                 <div class="entry-count">
-                    Pending matters: {{ entries|length }}
+                    <i class="fas fa-hourglass-start"></i> Pending matters: {{ entries|length }}
                 </div>
                 <div class="entry-count">
-                    Closed matters: {{ entries|length }}
+                    <i class="fas fa-check"></i> Closed matters: {{ entries|length }}
                 </div>
             </div>
             
@@ -265,7 +328,7 @@
                             <th>Council</th>
                             <th>Address</th>
                             <th>Contact</th>
-                            <th>Document</th>
+                            <th>Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -276,7 +339,7 @@
                             <td>{{ entry.council }}</td>
                             <td>{{ entry.subject_land_address }}</td>
                             <td>{{ entry.contact }}</td>
-                            <td><a href="{{ entry.document.url }}">Download</a></td>
+                            <td>{{ entry.status }}</td>
                             <td>
                                 <a href="#" onclick="fetchEditForm('{{ entry.pk }}'); return false;">Edit</a>
                                 <a href="{% url 'delete_entry' entry.pk %}" onclick="return confirm('Are you sure?');">Delete</a>
@@ -289,7 +352,7 @@
             </div>
             
             <!-- Trigger/Open The Modal -->
-            <button id="addEntryBtn">Add Entry</button>
+            <button id="addEntryBtn">Add new matter</button>
             </div>
             <div id="draftAgreementForm" style="display: none;">
                 <h2>Draft Agreement Questions</h2>
@@ -304,6 +367,13 @@
             
                     <input type="submit" value="Submit">
                 </form>
+                
+                    
+                    <button onclick="saveDraft()">Save Draft</button>
+
+                    <button onclick="loadDrafts()">Load Drafts</button>
+
+                    
             </div>
             
         </div>
@@ -387,6 +457,7 @@
                     <p>Created Date: ${data.created_date}</p>
                     <p>Last Updated: ${data.last_updated}</p>
                     <p>Document: <a href="${data.document_url}" target="_blank">Download</a></p>
+                    <p>Status: ${data.status}</p>
                 `;
             })
 
@@ -542,13 +613,27 @@
     <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
 
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             $('#entriesTable').DataTable({
-                "stripeClasses": ['odd', 'even'],
+                "paging": true, // Enable pagination
+                "pageLength": 10, // Set number of entries per page
+                "searching": true, // Enable the search function
+                "ordering": true, // Enable column ordering
+                "order": [[0, 'asc']], // Set the default ordering (column index, order)
+                "info": true, // Show table information (e.g., Showing 1 to 10 of 50 entries)
+                "autoWidth": false, // Disable automatic column width calculation
+                "responsive": true, // Enable responsiveness
+                "stripeClasses": ['odd', 'even'], // Custom stripe classes for odd and even rows
+                "columnDefs": [
+                    { "className": "dt-center", "targets": "_all" } // Center align all columns
+                ],
+                "language": {
+                    "search": "Filter records:", // Customize the search input placeholder
+                }
             });
         });
-
-    </script>
+        </script>
+        
 
 <script>
     // Function to show the draft agreement form and hide the overview content
@@ -591,7 +676,8 @@
     showOverview();
 </script>
 
+       
 
-        
+
 </body>
 </html>
