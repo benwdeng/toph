@@ -5,6 +5,7 @@
 </head>
 <body>
     <h2>{{ entry.name }}</h2>
+    <h2 data-entry-id="{{ entry.pk }}">{{ entry.name }}</h2>
     <p>Document: <a href="{{ entry.document.url }}">Download</a></p>
     <!-- Add more fields as necessary -->
     <a href="{% url 'entry_list' %}">Back to Entries</a>

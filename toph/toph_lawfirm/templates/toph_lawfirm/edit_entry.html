@@ -4,12 +4,26 @@
     <title>Edit Entry</title>
 </head>
 <body>
-    <form method="post" enctype="multipart/form-data" id="editEntryForm">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
-        <!-- Include the entry's ID as a hidden field -->
+        {% for field in form %}
+            <p>
+                <!-- Check if the current field is the one you want to change the id for -->
+                {% if field.name == "subject_land_address" or field.name == "contact_address" %}
+                    <!-- Manually render the field, setting a new id -->
+                    <label for="{{ field.id_for_label }}_edit">{{ field.label }}</label>
+                    <input id="{{ field.id_for_label }}_edit" name="{{ field.name }}" type="text" value="{{ field.value|default_if_none:"" }}">
+
+                {% else %}
+                    <!-- Render other fields normally -->
+                    {{ field.label_tag }} {{ field }}
+                {% endif %}
+            </p>
+        {% endfor %}
+        
+        <!-- Example of including the entry's ID in the form (Django template syntax) -->
         <input type="hidden" name="entry_id" value="{{ entry.id }}">
-        <button type="submit">Save changes</button>
+        <button type="submit" id="edit-submit-button">Submit</button>
     </form>
 </body>
 </html>
